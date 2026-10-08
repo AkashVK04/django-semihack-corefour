@@ -1,0 +1,41 @@
+{% extends 'events/base.html' %}
+
+{% block title %}Log In — EduEvent Platform{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center align-items-center py-5" style="min-height: 75vh;">
+  <div class="col-md-6 col-lg-4">
+    <div class="glass-card p-4 p-md-5">
+      
+      <!-- Visual Anchor: Closed Folder Box Icon -->
+      <div class="text-center mb-4">
+        <div class="brand-icon-box mx-auto mb-3" style="width:54px; height:54px; font-size:24px; background: linear-gradient(135deg, #00F2FE 0%, #9D4EDD 100%);">
+          <i class="fa-solid fa-folder-closed"></i>
+        </div>
+        <h3 class="font-display fw-extrabold text-white mb-1">WELCOME BACK</h3>
+        <p class="text-slate-400 small">Continue to your campus experience.</p>
+      </div>
+
+      <form method="POST" action="{% url 'login' %}">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label class="form-label text-slate-300 small font-display fw-semibold">Username</label>
+          <input type="text" name="username" class="form-control form-control-glass" placeholder="Enter your username" required>
+        </div>
+        <div class="mb-4">
+          <label class="form-label text-slate-300 small font-display fw-semibold">Password</label>
+          <input type="password" name="password" class="form-control form-control-glass" placeholder="Enter your password" required>
+        </div>
+
+        <button type="submit" class="btn btn-glass-primary w-100 py-2 font-display mb-3 fs-6">
+          SIGN IN →
+        </button>
+      </form>
+
+      <div class="text-center small text-slate-400 pt-2 border-top border-secondary border-opacity-25">
+        Don't have an account? <a href="{% url 'signup' %}" class="text-info font-display fw-semibold">Sign Up</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

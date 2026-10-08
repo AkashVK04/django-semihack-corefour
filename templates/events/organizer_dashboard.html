@@ -1,0 +1,178 @@
+{% extends 'events/base.html' %}
+
+{% block title %}Organizer Analytics Dashboard — EduEvent V2{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+  <div>
+    <div class="d-flex align-items-center gap-2 mb-1">
+      <h2 class="font-display fw-bold text-white mb-0">Organizer Dashboard</h2>
+      <span class="badge badge-glass badge-open">Event Operations</span>
+    </div>
+    <p class="text-slate-400 small mb-0">Manage owned events, track attendance rates, view feedback scores, and issue digital certificates.</p>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{% url 'create_event' %}" class="btn btn-glass-emerald">
+      <i class="fa-solid fa-plus-circle me-1"></i> New Event
+    </a>
+    <a href="{% url 'export_csv' %}" class="btn btn-glass-outline">
+      <i class="fa-solid fa-file-csv me-1 text-warning"></i> Export CSV
+    </a>
+  </div>
+</div>
+
+<!-- Metrics Row -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-3">
+    <div class="glass-card p-3 d-flex align-items-center gap-3">
+      <div class="brand-icon-box" style="width:42px; height:42px; font-size:18px; background: linear-gradient(135deg, #00F2FE, #4FACFE);">
+        <i class="fa-solid fa-users"></i>
+      </div>
+      <div>
+        <div class="fs-4 font-display fw-bold text-white mb-0">{{ stats.total_participants }}</div>
+        <div class="small text-slate-400">Total Participants</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="glass-card p-3 d-flex align-items-center gap-3">
+      <div class="brand-icon-box" style="width:42px; height:42px; font-size:18px; background: linear-gradient(135deg, #10B981, #059669);">
+        <i class="fa-solid fa-chart-line"></i>
+      </div>
+      <div>
+        <div class="fs-4 font-display fw-bold text-success mb-0">{{ stats.attendance_rate }}%</div>
+        <div class="small text-slate-400">Attendance Rate</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="glass-card p-3 d-flex align-items-center gap-3">
+      <div class="brand-icon-box" style="width:42px; height:42px; font-size:18px; background: linear-gradient(135deg, #9D4EDD, #7B2CBF);">
+        <i class="fa-solid fa-certificate"></i>
+      </div>
+      <div>
+        <div class="fs-4 font-display fw-bold text-info mb-0">{{ stats.valid_certs }}</div>
+        <div class="small text-slate-400">Valid Certificates</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="glass-card p-3 d-flex align-items-center gap-3">
+      <div class="brand-icon-box" style="width:42px; height:42px; font-size:18px; background: linear-gradient(135deg, #F43F5E, #E11D48);">
+        <i class="fa-solid fa-ban"></i>
+      </div>
+      <div>
+        <div class="fs-4 font-display fw-bold text-danger mb-0">{{ stats.revoked_certs }}</div>
+        <div class="small text-slate-400">Revoked Certs</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Filter Form -->
+<div class="glass-card p-3 mb-4">
+  <form method="GET" action="{% url 'organizer_dashboard' %}" class="row g-2 align-items-center">
+    <div class="col-md-4">
+      <select name="event" class="form-select form-control-glass">
+        <option value="">All Academic Events</option>
+        {% for ev in events %}
+          <option value="{{ ev.id }}" {% if selected_event == ev.id|stringformat:"s" %}selected{% endif %}>{{ ev.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-5">
+      <div class="input-group">
+        <input type="text" name="search" value="{{ search }}" class="form-control form-control-glass" placeholder="Search student name, ID, or email...">
+        <button type="submit" class="btn btn-glass-primary"><i class="fa-solid fa-magnifying-glass"></i> Filter</button>
+      </div>
+    </div>
+    <div class="col-md-3 text-end">
+      <a href="{% url 'organizer_dashboard' %}" class="btn btn-glass-outline btn-sm">Clear Filters</a>
+    </div>
+  </form>
+</div>
+
+<!-- Participant Management Table -->
+<div class="glass-card p-4">
+  <div class="table-responsive">
+    <table class="table table-dark table-hover align-middle mb-0 bg-transparent">
+      <thead>
+        <tr class="text-slate-400 small font-display border-bottom border-secondary border-opacity-25">
+          <th>Student ID</th>
+          <th>Name & Email</th>
+          <th>Event Name</th>
+          <th>Attendance (AJAX)</th>
+          <th>Feedback</th>
+          <th>Certificate Status</th>
+          <th class="text-end">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in participants %}
+          <tr class="border-bottom border-secondary border-opacity-10">
+            <td><code class="text-info font-monospace px-2 py-1 rounded bg-dark border border-secondary border-opacity-25">{{ p.student_id }}</code></td>
+            <td>
+              <strong class="text-white font-display d-block">{{ p.name }}</strong>
+              <small class="text-muted">{{ p.email }}</small>
+            </td>
+            <td class="small text-slate-300">{{ p.event.name }}</td>
+            <td>
+              <button class="btn btn-sm {% if p.attendance %}btn-glass-emerald{% else %}btn-glass-outline{% endif %}" onclick="toggleAttendance({{ p.pk }}, this)">
+                <span class="attendance-icon me-1">{% if p.attendance %}✅ Verified Present{% else %}⬜ Absent{% endif %}</span>
+              </button>
+            </td>
+            <td>
+              {% if p.feedback_submitted %}
+                <span class="badge badge-glass badge-valid"><i class="fa-solid fa-check me-1"></i> Submitted</span>
+              {% else %}
+                <span class="badge badge-glass badge-closed">Pending</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if p.certificate_record %}
+                {% if p.certificate_record.status == 'REVOKED' %}
+                  <span class="badge badge-glass badge-revoked">REVOKED ({{ p.certificate_record.certificate_id }})</span>
+                {% else %}
+                  <span class="badge badge-glass badge-valid">VALID ({{ p.certificate_record.certificate_id }})</span>
+                {% endif %}
+              {% elif p.eligible_for_certificate %}
+                <span class="badge badge-glass badge-valid">Eligible</span>
+              {% else %}
+                <span class="badge badge-glass badge-closed">Ineligible</span>
+              {% endif %}
+            </td>
+            <td class="text-end">
+              <div class="d-flex align-items-center justify-content-end gap-1">
+                <a href="{% url 'verify_certificate' hash=p.certificate_hash %}" class="btn btn-glass-outline btn-sm py-1 px-2" title="Verify Certificate">
+                  <i class="fa-solid fa-eye text-info"></i>
+                </a>
+                {% if p.certificate_record and p.certificate_record.status == 'REVOKED' %}
+                  <a href="{% url 'restore_certificate' pk=p.pk %}" class="btn btn-glass-emerald btn-sm py-1 px-2" title="Restore Certificate">
+                    <i class="fa-solid fa-rotate-left me-1"></i> Restore
+                  </a>
+                {% else %}
+                  <a href="{% url 'revoke_certificate' pk=p.pk %}" class="btn btn-glass-outline btn-sm py-1 px-2 text-danger border-danger border-opacity-50" title="Revoke Certificate">
+                    <i class="fa-solid fa-ban me-1"></i> Revoke
+                  </a>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="7" class="text-center py-5 text-muted">
+              <i class="fa-solid fa-users-slash display-5 text-secondary mb-3 d-block"></i>
+              <div class="font-display fs-5 text-white">No Participants Found</div>
+              <p class="small text-slate-400 mt-1">Try clearing filters or checking other events.</p>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/js/ajax_toggle.js"></script>
+{% endblock %}

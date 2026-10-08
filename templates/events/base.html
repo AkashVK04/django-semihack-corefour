@@ -1,365 +1,527 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full bg-[#08090D] text-[#E2E8F0]">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}EduEvent — Academic Event Management{% endblock %}</title>
+  <title>{% block title %}EduEvent — Academic Event & Digital Certification Platform{% endblock %}</title>
+
+  <!-- Google Fonts: Inter & Space Grotesk -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap 5 CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- FontAwesome 6 Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Three.js & GSAP Animation Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
   <style>
     :root {
-      --navy: #0d1b2a;
-      --navy-mid: #1b2d45;
-      --gold: #c9a84c;
-      --gold-light: #e8c76a;
-      --cream: #f7f4ef;
-      --ink: #1a1a2e;
-      --muted: #6b7280;
-      --success: #10b981;
-      --danger: #ef4444;
-    }
+      --bg-canvas: #08090D;
+      --glass-bg: rgba(15, 23, 42, 0.65);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --glass-border-hover: rgba(0, 242, 254, 0.3);
+      --accent-cyan: #00F2FE;
+      --accent-purple: #9D4EDD;
+      --accent-emerald: #10B981;
+      --accent-amber: #F59E0B;
+      --accent-rose: #F43F5E;
+      --text-muted: #94A3B8;
 
-    * { box-sizing: border-box; }
+      /* Folder CSS Variables */
+      --folder-color: #5227FF;
+      --folder-back-color: #431ce6;
+      --paper-1: #e6e6e6;
+      --paper-2: #f2f2f2;
+      --paper-3: #ffffff;
+    }
 
     body {
-      font-family: 'DM Sans', sans-serif;
-      background: var(--cream);
-      color: var(--ink);
-      min-height: 100vh;
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-canvas);
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(157, 78, 221, 0.12) 0%, transparent 45%),
+        radial-gradient(circle at 85% 85%, rgba(0, 242, 254, 0.08) 0%, transparent 45%);
+      background-attachment: fixed;
+      color: #E2E8F0;
+      overflow-x: hidden;
+      position: relative;
     }
 
-    /* NAVBAR */
-    .navbar-main {
-      background: var(--navy);
-      border-bottom: 3px solid var(--gold);
-      padding: 0.75rem 0;
+    .font-display {
+      font-family: 'Space Grotesk', sans-serif;
     }
-    .navbar-brand-text {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.4rem;
-      color: var(--gold) !important;
-      letter-spacing: 0.02em;
-    }
-    .navbar-brand-sub {
-      font-size: 0.65rem;
-      color: #8899aa;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      display: block;
-      line-height: 1;
-    }
-    .nav-link {
-      color: #c8d8e8 !important;
-      font-size: 0.875rem;
-      font-weight: 500;
-      padding: 0.5rem 1rem !important;
-      border-radius: 6px;
-      transition: all 0.2s;
-    }
-    .nav-link:hover, .nav-link.active {
-      color: var(--gold) !important;
-      background: rgba(201, 168, 76, 0.1);
-    }
-    .nav-link i { margin-right: 5px; }
 
-    /* PAGE HEADER */
-    .page-header {
-      background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
-      color: white;
-      padding: 3rem 0 2.5rem;
-      margin-bottom: 2rem;
+    /* EduEvent Pixel Snow Canvas Layer */
+    #eduevent-atmosphere {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* Fixed Background Layer for Persistent 3D Object */
+    #fixed-3d-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 10;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    /* Floating Capsule Glass Navbar */
+    .nav-capsule-wrapper {
+      position: sticky;
+      top: 1rem;
+      z-index: 1040;
+      padding: 0 1rem;
+    }
+
+    .navbar-capsule {
+      background: rgba(13, 17, 28, 0.75);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: 9999px;
+      padding: 0.6rem 1.5rem;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .navbar-capsule:hover {
+      border-color: rgba(255, 255, 255, 0.18);
+    }
+
+    .navbar-brand-glow {
+      position: relative;
+      transition: transform 0.3s ease;
+    }
+    .navbar-brand-glow:hover {
+      transform: scale(1.03);
+    }
+
+    .brand-icon-box {
+      width: 34px;
+      height: 34px;
+      background: linear-gradient(135deg, #00F2FE 0%, #4FACFE 100%);
+      border-radius: 10px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #08090D;
+      box-shadow: 0 0 15px rgba(0, 242, 254, 0.4);
+    }
+
+    /* Liquid Glass Cards */
+    .glass-card {
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease, box-shadow 0.3s ease;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      position: relative;
+      overflow: hidden;
+      z-index: 20;
+    }
+
+    .glass-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+      transition: left 0.6s ease;
+    }
+
+    .glass-card:hover::before {
+      left: 100%;
+    }
+
+    .glass-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--glass-border-hover);
+      box-shadow: 0 20px 40px rgba(0, 242, 254, 0.12), 0 0 30px rgba(157, 78, 221, 0.08);
+    }
+
+    /* Specular Buttons with Moving Light Reflection */
+    .btn-glass-primary {
+      background: linear-gradient(135deg, #00F2FE 0%, #4FACFE 100%);
+      color: #08090D;
+      font-weight: 700;
+      border: none;
+      border-radius: 12px;
+      padding: 0.65rem 1.4rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 20px rgba(0, 242, 254, 0.35);
       position: relative;
       overflow: hidden;
     }
-    .page-header::before {
+
+    .btn-glass-primary::after {
       content: '';
       position: absolute;
       top: -50%;
-      right: -10%;
-      width: 400px;
-      height: 400px;
-      background: radial-gradient(circle, rgba(201,168,76,0.08) 0%, transparent 70%);
-      border-radius: 50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.6) 0%, transparent 60%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
     }
-    .page-header h1 {
-      font-family: 'Playfair Display', serif;
-      font-size: 2.2rem;
+
+    .btn-glass-primary:hover::after {
+      opacity: 0.3;
+    }
+
+    .btn-glass-primary:hover {
+      color: #08090D;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(0, 242, 254, 0.55);
+    }
+
+    .btn-glass-emerald {
+      background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+      color: #ffffff;
       font-weight: 700;
-      margin-bottom: 0.25rem;
-    }
-    .page-header p {
-      color: #8899aa;
-      margin: 0;
-      font-size: 0.95rem;
-    }
-    .page-header .breadcrumb-item { color: #8899aa; font-size: 0.8rem; }
-    .page-header .breadcrumb-item a { color: var(--gold); text-decoration: none; }
-    .page-header .breadcrumb-item.active { color: white; }
-
-    /* CARDS */
-    .card {
-      border: 1px solid #e5e0d6;
+      border: none;
       border-radius: 12px;
-      background: white;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
-    }
-    .card-header {
-      background: var(--navy);
-      color: white;
-      border-radius: 11px 11px 0 0 !important;
-      padding: 1rem 1.5rem;
-      font-family: 'Playfair Display', serif;
-      font-size: 1.1rem;
-    }
-    .card-header .badge { font-family: 'DM Sans', sans-serif; }
-
-    /* FORM CONTROLS */
-    .form-control, .form-select {
-      border: 1.5px solid #d9d4cc;
-      border-radius: 8px;
-      padding: 0.65rem 1rem;
-      font-size: 0.9rem;
-      transition: all 0.2s;
-      background: #fdfcfa;
-    }
-    .form-control:focus, .form-select:focus {
-      border-color: var(--gold);
-      box-shadow: 0 0 0 3px rgba(201,168,76,0.15);
-      background: white;
-    }
-    .form-label {
-      font-weight: 600;
-      font-size: 0.85rem;
-      color: #374151;
-      margin-bottom: 0.4rem;
-      letter-spacing: 0.01em;
-    }
-
-    /* BUTTONS */
-    .btn-primary-gold {
-      background: var(--navy);
-      color: var(--gold);
-      border: 2px solid var(--gold);
-      padding: 0.7rem 2rem;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 0.9rem;
-      letter-spacing: 0.03em;
-      transition: all 0.25s;
-    }
-    .btn-primary-gold:hover {
-      background: var(--gold);
-      color: var(--navy);
-      transform: translateY(-1px);
-      box-shadow: 0 4px 16px rgba(201,168,76,0.3);
-    }
-    .btn-sm-action {
-      padding: 0.3rem 0.8rem;
-      font-size: 0.8rem;
-      border-radius: 6px;
-      font-weight: 500;
-    }
-
-    /* STAT CARDS */
-    .stat-card {
-      background: white;
-      border: 1px solid #e5e0d6;
-      border-radius: 12px;
-      padding: 1.5rem;
-      text-align: center;
+      padding: 0.65rem 1.4rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 20px rgba(16, 185, 129, 0.35);
       position: relative;
       overflow: hidden;
     }
-    .stat-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 4px;
-      background: var(--gold);
-    }
-    .stat-card.navy::before { background: var(--navy); }
-    .stat-card.success::before { background: var(--success); }
-    .stat-card.purple::before { background: #7c3aed; }
-    .stat-number {
-      font-family: 'Playfair Display', serif;
-      font-size: 2.4rem;
-      font-weight: 700;
-      color: var(--navy);
-      line-height: 1;
-    }
-    .stat-label {
-      font-size: 0.78rem;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      margin-top: 0.4rem;
-      font-weight: 600;
+
+    .btn-glass-emerald:hover {
+      color: #ffffff;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(16, 185, 129, 0.55);
     }
 
-    /* TABLE */
-    .table-main {
-      font-size: 0.875rem;
+    .btn-glass-outline {
+      background: rgba(255, 255, 255, 0.04);
+      color: #E2E8F0;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 12px;
+      padding: 0.65rem 1.4rem;
+      backdrop-filter: blur(8px);
+      transition: all 0.3s ease;
     }
-    .table-main th {
-      background: #f3f0ea;
-      color: #374151;
-      font-weight: 600;
+
+    .btn-glass-outline:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.3);
+      color: #ffffff;
+      transform: translateY(-2px);
+    }
+
+    /* Badges */
+    .badge-glass {
+      padding: 0.4em 0.85em;
+      border-radius: 9999px;
       font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
       text-transform: uppercase;
-      letter-spacing: 0.08em;
+    }
+
+    .badge-open {
+      background: rgba(0, 242, 254, 0.12);
+      color: #00F2FE;
+      border: 1px solid rgba(0, 242, 254, 0.3);
+    }
+
+    .badge-valid {
+      background: rgba(16, 185, 129, 0.12);
+      color: #34D399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .badge-revoked {
+      background: rgba(244, 63, 94, 0.12);
+      color: #FB7185;
+      border: 1px solid rgba(244, 63, 94, 0.3);
+    }
+
+    .badge-closed {
+      background: rgba(148, 163, 184, 0.12);
+      color: #94A3B8;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+    }
+
+    /* Form Controls */
+    .form-control-glass {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #E2E8F0;
+      border-radius: 12px;
       padding: 0.75rem 1rem;
-      border: none;
     }
-    .table-main td {
-      padding: 0.75rem 1rem;
-      vertical-align: middle;
-      border-color: #f0ece4;
-    }
-    .table-main tr:hover td { background: #faf8f4; }
-
-    /* BADGE STYLES */
-    .badge-present { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
-    .badge-absent { background: #fee2e2; color: #7f1d1d; border: 1px solid #fca5a5; }
-    .badge-done { background: #dbeafe; color: #1e3a5f; border: 1px solid #bfdbfe; }
-    .badge-pending { background: #f3f4f6; color: #6b7280; border: 1px solid #d1d5db; }
-
-    /* ALERTS */
-    .alert { border: none; border-radius: 10px; font-size: 0.9rem; }
-    .alert-success { background: #d1fae5; color: #064e3b; }
-    .alert-danger { background: #fee2e2; color: #7f1d1d; }
-    .alert-warning { background: #fef3c7; color: #78350f; }
-    .alert-info { background: #dbeafe; color: #1e3a5f; }
-
-    /* STAR RATING */
-    .star-radio { display: none; }
-    .star-group { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 0.5rem; }
-    .star-group label {
-      cursor: pointer;
-      padding: 0.4rem 1rem;
-      border: 1.5px solid #d9d4cc;
-      border-radius: 8px;
-      font-size: 1rem;
-      transition: all 0.2s;
-      background: white;
-    }
-    .star-group input:checked + label,
-    .star-group label:hover {
-      border-color: var(--gold);
-      background: rgba(201,168,76,0.12);
-      color: var(--navy);
-      font-weight: 600;
+    .form-control-glass:focus {
+      background: rgba(15, 23, 42, 0.9);
+      border-color: var(--accent-cyan);
+      color: #ffffff;
+      box-shadow: 0 0 15px rgba(0, 242, 254, 0.25);
     }
 
-    /* TOGGLE SWITCH */
-    .toggle-btn {
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 0;
-      font-size: 1.2rem;
-      transition: transform 0.15s;
+    /* 3D Folder Component CSS Structure */
+    .folder {
+      width: 360px;
+      height: 240px;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 10;
+      perspective: 1200px;
+      transform-style: preserve-3d;
     }
-    .toggle-btn:hover { transform: scale(1.2); }
-    .toggle-btn.loading { opacity: 0.5; pointer-events: none; }
-
-    /* MONO */
-    .mono { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; }
-
-    /* FOOTER */
-    .footer-main {
-      background: var(--navy);
-      color: #8899aa;
-      padding: 1.5rem 0;
-      margin-top: 4rem;
-      font-size: 0.8rem;
-      border-top: 3px solid var(--gold);
+    .folder__back {
+      width: 100%;
+      height: 100%;
+      background: var(--folder-back-color, #431ce6);
+      border-radius: 20px;
+      position: absolute;
+      top: 0;
+      left: 0;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+      transform-style: preserve-3d;
     }
-    .footer-main a { color: var(--gold); text-decoration: none; }
-
-    /* RESPONSIVE */
-    @media (max-width: 768px) {
-      .page-header h1 { font-size: 1.6rem; }
-      .stat-number { font-size: 1.8rem; }
-      .table-responsive { font-size: 0.8rem; }
+    .folder__front {
+      width: 100%;
+      height: 85%;
+      background: var(--folder-color, #5227FF);
+      border-radius: 20px;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      transform-origin: bottom;
+      transform-style: preserve-3d;
+      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 -8px 25px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+      z-index: 5;
     }
+    .folder.open .folder__front {
+      transform: rotateX(-70deg);
+    }
+    .folder-glow {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 20px;
+      background: radial-gradient(circle, rgba(0,242,254,0.75) 0%, rgba(157,78,221,0.5) 50%, transparent 80%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: 4;
+      pointer-events: none;
+    }
+    .paper {
+      width: 88%;
+      height: 80%;
+      background: #ffffff;
+      border-radius: 12px;
+      position: absolute;
+      top: 10%;
+      left: 6%;
+      transition: transform 0.5s ease, opacity 0.5s ease;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+    }
+    .paper-1 { background: var(--paper-1, #e6e6e6); transform: translateY(0); z-index: 1; }
+    .paper-2 { background: var(--paper-2, #f2f2f2); transform: translateY(-8px) scale(0.96); z-index: 2; }
+    .paper-3 { background: var(--paper-3, #ffffff); transform: translateY(-16px) scale(0.92); z-index: 3; }
+
+    .folder.open .paper-1 { transform: translateY(-35px) scale(0.98); }
+    .folder.open .paper-2 { transform: translateY(-55px) scale(0.96); }
+    .folder.open .paper-3 { transform: translateY(-75px) scale(0.94); }
   </style>
   {% block extra_head %}{% endblock %}
 </head>
-<body>
+<body class="d-flex flex-column min-vh-100">
 
-<!-- NAVBAR -->
-<nav class="navbar navbar-main navbar-expand-lg">
-  <div class="container">
-    <a class="navbar-brand d-flex align-items-center gap-2" href="{% url 'index' %}">
-      <div style="width:36px;height:36px;background:var(--gold);border-radius:8px;display:flex;align-items:center;justify-content:center;">
-        <i class="bi bi-mortarboard-fill" style="color:var(--navy);font-size:1.1rem;"></i>
-      </div>
-      <div>
-        <span class="navbar-brand-text">EduEvent</span>
-        <span class="navbar-brand-sub">Academic Event System</span>
-      </div>
-    </a>
-    <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navMain" style="color:white;">
-      <i class="bi bi-list" style="font-size:1.5rem;"></i>
-    </button>
-    <div class="collapse navbar-collapse" id="navMain">
-      <ul class="navbar-nav ms-auto gap-1 align-items-lg-center">
-        <li class="nav-item">
-          <a class="nav-link {% if request.resolver_match.url_name == 'index' %}active{% endif %}" href="{% url 'index' %}">
-            <i class="bi bi-house-door"></i>Home
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link {% if request.resolver_match.url_name == 'register' %}active{% endif %}" href="{% url 'register' %}">
-            <i class="bi bi-person-plus"></i>Register
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}" href="{% url 'admin_dashboard' %}">
-            <i class="bi bi-speedometer2"></i>Dashboard
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'export_csv' %}">
-            <i class="bi bi-download"></i>Export CSV
-          </a>
-        </li>
-      </ul>
+  <!-- EduEvent Pixel Snow Canvas -->
+  <canvas id="eduevent-atmosphere"></canvas>
+
+  <!-- Fixed Background Layer for Persistent 3D Object -->
+  <div id="fixed-3d-bg">
+    {% block background_3d %}{% endblock %}
+  </div>
+
+  <!-- Floating Capsule Navbar Wrapper -->
+  <div class="nav-capsule-wrapper">
+    <div class="container">
+      <nav class="navbar navbar-expand-lg navbar-dark navbar-capsule">
+        <a class="navbar-brand d-flex align-items-center gap-2 font-display fw-bold navbar-brand-glow" href="{% url 'index' %}">
+          <span class="brand-icon-box"><i class="fa-solid fa-folder-open"></i></span>
+          <span class="fs-5 text-white">Edu<span style="color: var(--accent-cyan);">Event</span></span>
+        </a>
+        
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navContent">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navContent">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4 gap-lg-1">
+            {% if not user.is_authenticated %}
+              <li class="nav-item">
+                <a class="nav-link text-slate-300 px-3" href="{% url 'index' %}"><i class="fa-solid fa-compass me-1 text-info"></i> Explore Events</a>
+              </li>
+            {% else %}
+
+              {% if user.is_superuser or user.profile.role == 'ADMIN' %}
+                <li class="nav-item"><a class="nav-link text-slate-300 px-3" href="{% url 'system_admin_dashboard' %}"><i class="fa-solid fa-shield-halved me-1 text-warning"></i> Admin Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link text-slate-300 px-3" href="{% url 'admin_user_management' %}"><i class="fa-solid fa-users-gear me-1 text-info"></i> Users</a></li>
+                <li class="nav-item"><a class="nav-link text-slate-300 px-3" href="{% url 'admin_event_management' %}"><i class="fa-solid fa-calendar-check me-1 text-success"></i> Events</a></li>
+                <li class="nav-item"><a class="nav-link text-slate-300 px-3" href="{% url 'admin_certificate_management' %}"><i class="fa-solid fa-certificate me-1 text-primary"></i> Certificates</a></li>
+
+              {% elif user.profile.role == 'EVENT_ORGANIZER' %}
+                <li class="nav-item"><a class="nav-link text-slate-300 px-3" href="{% url 'organizer_dashboard' %}"><i class="fa-solid fa-chart-pie me-1 text-info"></i> Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link text-slate-300 px-3" href="{% url 'create_event' %}"><i class="fa-solid fa-plus-circle me-1 text-success"></i> Create Event</a></li>
+                <li class="nav-item"><a class="nav-link text-slate-300 px-3" href="{% url 'export_csv' %}"><i class="fa-solid fa-file-csv me-1 text-warning"></i> Export CSV</a></li>
+
+              {% elif user.profile.role == 'ATTENDANCE_STAFF' %}
+                <li class="nav-item"><a class="nav-link text-slate-300 px-3" href="{% url 'staff_dashboard' %}"><i class="fa-solid fa-clipboard-check me-1 text-info"></i> Staff Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link text-slate-300 px-3" href="{% url 'scan_attendance' %}"><i class="fa-solid fa-qrcode me-1 text-success"></i> QR Scanner</a></li>
+
+              {% else %}
+                <li class="nav-item"><a class="nav-link text-slate-300 px-3" href="{% url 'student_dashboard' %}"><i class="fa-solid fa-graduation-cap me-1 text-info"></i> Student Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link text-slate-300 px-3" href="{% url 'index' %}#upcoming-section"><i class="fa-solid fa-calendar-days me-1 text-primary"></i> Browse Events</a></li>
+                <li class="nav-item"><a class="nav-link text-slate-300 px-3" href="{% url 'student_dashboard' %}#my-certificates"><i class="fa-solid fa-award me-1 text-warning"></i> My Certificates</a></li>
+              {% endif %}
+
+            {% endif %}
+          </ul>
+
+          <div class="d-flex align-items-center gap-2 mt-3 mt-lg-0">
+            {% if user.is_authenticated %}
+              <div class="d-flex align-items-center me-2 bg-dark px-3 py-1 rounded-pill border border-secondary border-opacity-25">
+                <i class="fa-solid fa-circle-user me-2" style="color: var(--accent-cyan);"></i>
+                <span class="small font-display text-white me-2">{{ user.username }}</span>
+                {% if user.profile %}
+                  <span class="badge badge-glass badge-open">{{ user.profile.get_role_display }}</span>
+                {% else %}
+                  <span class="badge badge-glass badge-open">Admin</span>
+                {% endif %}
+              </div>
+              <a href="{% url 'logout' %}" class="btn btn-glass-outline btn-sm px-3 rounded-pill"><i class="fa-solid fa-power-off"></i></a>
+            {% else %}
+              <a href="{% url 'login' %}" class="btn btn-glass-outline btn-sm px-3 rounded-pill">Log In</a>
+              <a href="{% url 'signup' %}" class="btn btn-glass-primary btn-sm px-4 rounded-pill">Sign Up</a>
+            {% endif %}
+          </div>
+        </div>
+      </nav>
     </div>
   </div>
-</nav>
 
-<!-- MESSAGES -->
-{% if messages %}
-<div class="container mt-3">
-  {% for msg in messages %}
-    <div class="alert alert-{{ msg.tags }} alert-dismissible fade show" role="alert">
-      {{ msg }}
-      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-  {% endfor %}
-</div>
-{% endif %}
-
-<!-- CONTENT -->
-{% block content %}{% endblock %}
-
-<!-- FOOTER -->
-<footer class="footer-main">
-  <div class="container d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
-    <div>
-      <strong style="color:var(--gold);">EduEvent</strong> — Academic Event Management System
-      &nbsp;·&nbsp; Django MVT + AJAX + ReportLab
-    </div>
-    <div>
-      <span class="badge" style="background:rgba(201,168,76,0.15);color:var(--gold);border:1px solid rgba(201,168,76,0.3);">SDG 4: Quality Education</span>
-    </div>
+  <!-- Messages Banner -->
+  <div class="container mt-3" style="position: relative; z-index: 30;">
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show glass-card border-0 text-white" role="alert">
+          <i class="fa-solid fa-circle-info me-2 text-info"></i> {{ message }}
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
   </div>
-</footer>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-{% block extra_js %}{% endblock %}
+  <!-- Main Content Body -->
+  <main class="container my-4 flex-grow-1" style="position: relative; z-index: 30;">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Footer -->
+  <footer class="mt-auto py-5 border-top border-secondary border-opacity-10 bg-black bg-opacity-70 text-slate-400 text-center text-sm" style="position: relative; z-index: 30;">
+    <div class="container">
+      <h2 class="font-display fw-extrabold text-white mb-2" style="letter-spacing: 0.05em;">MAKE YOUR NEXT MOMENT COUNT.</h2>
+      <p class="small text-slate-400 mb-4">EduEvent Platform · Department of Computer Science & Engineering · SJBIT</p>
+      
+      <div class="d-flex justify-content-center gap-4 text-xs font-display text-uppercase text-slate-400 mb-4">
+        <a href="{% url 'index' %}" class="text-slate-400 text-decoration-none hover-white">Events</a>
+        <a href="{% url 'index' %}#bento-section" class="text-slate-400 text-decoration-none hover-white">Categories</a>
+        <a href="{% url 'index' %}#stats-section" class="text-slate-400 text-decoration-none hover-white">Activity</a>
+        <a href="{% url 'login' %}" class="text-slate-400 text-decoration-none hover-white">Portal</a>
+      </div>
+
+      <div class="small text-muted border-top border-secondary border-opacity-10 pt-3">
+        © 2026 EduEvent Platform. All rights reserved.
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- EduEvent Pixel Snow Atmosphere Canvas Script -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const canvas = document.getElementById('eduevent-atmosphere');
+      if (!canvas) return;
+
+      const ctx = canvas.getContext('2d');
+      let width = canvas.width = window.innerWidth;
+      let height = canvas.height = window.innerHeight;
+
+      // Sparse Pixel Particles
+      const particleCount = Math.min(Math.floor(width / 25), 45);
+      const particles = [];
+
+      for (let i = 0; i < particleCount; i++) {
+        particles.push({
+          x: Math.random() * width,
+          y: Math.random() * height,
+          size: Math.random() * 2 + 1,
+          speedY: Math.random() * 0.4 + 0.1,
+          speedX: (Math.random() - 0.5) * 0.2,
+          opacity: Math.random() * 0.5 + 0.15
+        });
+      }
+
+      function renderAtmosphere() {
+        ctx.clearRect(0, 0, width, height);
+
+        for (let i = 0; i < particleCount; i++) {
+          const p = particles[i];
+          p.y += p.speedY;
+          p.x += p.speedX;
+
+          if (p.y > height) { p.y = 0; p.x = Math.random() * width; }
+          if (p.x > width) p.x = 0;
+          if (p.x < 0) p.x = width;
+
+          ctx.fillStyle = `rgba(0, 242, 254, ${p.opacity})`;
+          ctx.fillRect(p.x, p.y, p.size, p.size);
+        }
+
+        requestAnimationFrame(renderAtmosphere);
+      }
+
+      renderAtmosphere();
+
+      window.addEventListener('resize', function() {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+      });
+    });
+  </script>
+
+  {% block extra_js %}{% endblock %}
 </body>
 </html>

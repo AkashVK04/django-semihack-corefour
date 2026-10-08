@@ -1,0 +1,28 @@
+{% extends 'events/base.html' %}
+
+{% block title %}Revoke Certificate — Admin Portal{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-4">
+  <div class="col-md-6">
+    <div class="card-custom p-4 border-danger">
+      <h4 class="font-display fw-bold text-white mb-2"><i class="fa-solid fa-ban text-danger me-2"></i> Revoke Certificate</h4>
+      <p class="text-slate-400 small mb-3">
+        Revoking certificate <strong class="text-white font-monospace">{{ certificate.certificate_id }}</strong> for <strong class="text-white">{{ participant.name }}</strong> ({{ participant.student_id }}).
+      </p>
+
+      <form method="POST">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label class="form-label text-slate-300 small fw-semibold">Official Reason for Revocation *</label>
+          {{ form.reason }}
+        </div>
+        <div class="d-flex justify-content-end gap-2">
+          <a href="{% url 'organizer_dashboard' %}" class="btn btn-outline-secondary btn-sm">Cancel</a>
+          <button type="submit" class="btn btn-danger btn-sm">Confirm Revocation</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

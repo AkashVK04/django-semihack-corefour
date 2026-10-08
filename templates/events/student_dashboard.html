@@ -1,0 +1,152 @@
+{% extends 'events/base.html' %}
+
+{% block title %}My Student Portal — EduEvent V2{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+  <div>
+    <div class="d-flex align-items-center gap-2 mb-1">
+      <h2 class="font-display fw-bold text-white mb-0">My Student Portal</h2>
+      <span class="badge badge-glass badge-open">Student Experience</span>
+    </div>
+    <p class="text-slate-400 small mb-0">Track your registrations, QR entry passes, feedback ratings, and earned digital certificates.</p>
+  </div>
+  <a href="{% url 'register' %}" class="btn btn-glass-primary">
+    <i class="fa-solid fa-plus-circle me-1"></i> Register New Event
+  </a>
+</div>
+
+<!-- Stats Row -->
+<div class="row g-4 mb-4">
+  <div class="col-md-4">
+    <div class="glass-card p-4 d-flex align-items-center gap-3">
+      <div class="brand-icon-box" style="width:48px; height:48px; font-size:20px; background: linear-gradient(135deg, #00F2FE, #4FACFE);">
+        <i class="fa-solid fa-calendar-check"></i>
+      </div>
+      <div>
+        <div class="fs-4 font-display fw-bold text-white">{{ registrations|length }}</div>
+        <div class="small text-slate-400">Total Registrations</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="glass-card p-4 d-flex align-items-center gap-3">
+      <div class="brand-icon-box" style="width:48px; height:48px; font-size:20px; background: linear-gradient(135deg, #10B981, #059669);">
+        <i class="fa-solid fa-qrcode"></i>
+      </div>
+      <div>
+        <div class="fs-4 font-display fw-bold text-white">
+          {% for r in registrations %}{% if r.attendance %}1{% endif %}{% empty %}0{% endfor %}
+        </div>
+        <div class="small text-slate-400">Attended Events</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="glass-card p-4 d-flex align-items-center gap-3">
+      <div class="brand-icon-box" style="width:48px; height:48px; font-size:20px; background: linear-gradient(135deg, #9D4EDD, #7B2CBF);">
+        <i class="fa-solid fa-award"></i>
+      </div>
+      <div>
+        <div class="fs-4 font-display fw-bold text-white">
+          {% for r in registrations %}{% if r.eligible_for_certificate %}1{% endif %}{% empty %}0{% endfor %}
+        </div>
+        <div class="small text-slate-400">Certificates Earned</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Registrations Table -->
+<div class="glass-card p-4 mb-5">
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <h4 class="font-display fw-bold text-white mb-0">
+      <i class="fa-solid fa-clipboard-list text-info me-2"></i>My Registered Academic Events
+    </h4>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-dark table-hover align-middle mb-0 bg-transparent">
+      <thead>
+        <tr class="text-slate-400 small font-display border-bottom border-secondary border-opacity-25">
+          <th>Event Name</th>
+          <th>Student ID</th>
+          <th>Date & Venue</th>
+          <th>Attendance</th>
+          <th>Feedback</th>
+          <th>Certificate Status</th>
+          <th class="text-end">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for reg in registrations %}
+          <tr class="border-bottom border-secondary border-opacity-10">
+            <td>
+              <strong class="text-white font-display fs-6">{{ reg.event.name }}</strong>
+            </td>
+            <td><code class="text-info font-monospace px-2 py-1 rounded bg-dark border border-secondary border-opacity-25">{{ reg.student_id }}</code></td>
+            <td class="small text-slate-300">
+              <div><i class="fa-regular fa-calendar me-1 text-info"></i> {{ reg.event.date|date:"M d, Y" }}</div>
+              <div class="text-muted"><i class="fa-solid fa-location-dot me-1 text-danger"></i> {{ reg.event.venue }}</div>
+            </td>
+            <td>
+              {% if reg.attendance %}
+                <span class="badge badge-glass badge-valid"><i class="fa-solid fa-check me-1"></i> Verified Present</span>
+              {% else %}
+                <span class="badge badge-glass badge-closed">Pending Check-in</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if reg.feedback_submitted %}
+                <span class="badge badge-glass badge-valid"><i class="fa-solid fa-star me-1"></i> Submitted</span>
+              {% elif reg.attendance %}
+                <a href="{% url 'feedback' pk=reg.pk %}" class="btn btn-glass-primary btn-sm py-1 px-3 fs-xs">Rate Event</a>
+              {% else %}
+                <span class="text-muted small">Requires Attendance</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if reg.certificate_record and reg.certificate_record.status == 'REVOKED' %}
+                <span class="badge badge-glass badge-revoked"><i class="fa-solid fa-ban me-1"></i> REVOKED</span>
+              {% elif reg.eligible_for_certificate %}
+                <span class="badge badge-glass badge-valid"><i class="fa-solid fa-award me-1"></i> Ready</span>
+              {% else %}
+                <span class="badge badge-glass badge-closed">Ineligible</span>
+              {% endif %}
+            </td>
+            <td class="text-end">
+              <div class="d-flex align-items-center justify-content-end gap-1">
+                {% if reg.eligible_for_certificate %}
+                  <a href="{% url 'verify_certificate' hash=reg.certificate_hash %}" class="btn btn-glass-outline btn-sm py-1 px-2">
+                    <i class="fa-solid fa-shield-halved me-1 text-info"></i> Verify
+                  </a>
+                  {% if reg.certificate_record and reg.certificate_record.status == 'VALID' %}
+                    <a href="{% url 'certificate' hash=reg.certificate_hash %}" class="btn btn-glass-emerald btn-sm py-1 px-2">
+                      <i class="fa-solid fa-download me-1"></i> PDF
+                    </a>
+                  {% endif %}
+                {% else %}
+                  <a href="{% url 'registration_success' pk=reg.pk %}" class="btn btn-glass-outline btn-sm py-1 px-3">
+                    <i class="fa-solid fa-qrcode me-1 text-info"></i> Entry Pass
+                  </a>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="7" class="text-center py-5 text-muted">
+              <i class="fa-solid fa-box-open display-5 text-secondary mb-3 d-block"></i>
+              <div class="font-display fs-5 text-white">No Registered Events Yet</div>
+              <p class="small text-slate-400 mt-1">Browse open campus events and register to earn your digital certificate.</p>
+              <a href="{% url 'register' %}" class="btn btn-glass-primary btn-sm mt-2">Register Now</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

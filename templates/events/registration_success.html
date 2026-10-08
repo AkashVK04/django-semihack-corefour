@@ -1,57 +1,50 @@
 {% extends 'events/base.html' %}
-{% block title %}Registration Successful — EduEvent{% endblock %}
+
+{% block title %}Registration Success — EduEvent{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-  <div class="row justify-content-center">
-    <div class="col-lg-6 col-md-8 text-center">
-      <div style="width:80px;height:80px;background:linear-gradient(135deg,#d1fae5,#a7f3d0);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;">
-        <i class="bi bi-check-lg" style="font-size:2.2rem;color:#065f46;"></i>
+<div class="row justify-content-center py-4">
+  <div class="col-md-8 col-lg-6 text-center">
+    <div class="card-custom p-4 p-md-5">
+      <div class="mb-3">
+        <i class="fa-solid fa-circle-check text-success display-3"></i>
       </div>
-      <h1 style="font-family:'Playfair Display',serif;font-size:2rem;margin-bottom:0.5rem;">Registration Confirmed!</h1>
-      <p style="color:var(--muted);margin-bottom:2rem;">Welcome, <strong>{{ participant.name }}</strong>. You're registered for <strong>{{ participant.event.name }}</strong>.</p>
+      <h3 class="font-display fw-bold text-white mb-2">Registration Confirmed!</h3>
+      <p class="text-slate-400 small mb-4">
+        Welcome <strong class="text-white">{{ participant.name }}</strong>. Present your event QR code at entry for instant check-in.
+      </p>
 
-      <div class="card mb-4">
-        <div class="card-body p-4">
-          <div class="row g-3 text-start">
-            <div class="col-6">
-              <div style="font-size:0.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;font-weight:600;">Student ID</div>
-              <div class="mono mt-1" style="font-size:1rem;font-weight:700;color:var(--navy);">{{ participant.student_id }}</div>
-            </div>
-            <div class="col-6">
-              <div style="font-size:0.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;font-weight:600;">Event</div>
-              <div style="font-size:0.9rem;font-weight:600;margin-top:4px;">{{ participant.event.name }}</div>
-            </div>
-            <div class="col-6">
-              <div style="font-size:0.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;font-weight:600;">Date</div>
-              <div style="font-size:0.9rem;margin-top:4px;">{{ participant.event.date|date:"M d, Y" }}</div>
-            </div>
-            <div class="col-6">
-              <div style="font-size:0.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;font-weight:600;">Venue</div>
-              <div style="font-size:0.9rem;margin-top:4px;">{{ participant.event.venue }}</div>
-            </div>
-          </div>
+      {% if participant.qr_code %}
+        <div class="bg-white p-3 d-inline-block rounded-3 shadow mb-4">
+          <img src="{{ participant.qr_code.url }}" alt="Event QR Code" style="width: 200px; height: 200px;">
+        </div>
+      {% endif %}
 
-          {% if participant.qr_code %}
-          <hr style="border-color:#e5e0d6;">
-          <div style="font-size:0.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;font-weight:600;margin-bottom:0.75rem;">Your Certificate QR Code</div>
-          <img src="{{ participant.qr_code.url }}" alt="QR Code" style="width:120px;height:120px;border:3px solid var(--navy);border-radius:8px;padding:4px;">
-          <div style="font-size:0.78rem;color:var(--muted);margin-top:0.5rem;">Scan after event to access your certificate</div>
-          {% endif %}
+      <div class="card-custom bg-dark p-3 text-start mb-4 small">
+        <div class="d-flex justify-content-between mb-2">
+          <span class="text-muted">Student ID:</span>
+          <strong class="text-white font-monospace">{{ participant.student_id }}</strong>
+        </div>
+        <div class="d-flex justify-content-between mb-2">
+          <span class="text-muted">Event:</span>
+          <strong class="text-white">{{ participant.event.name }}</strong>
+        </div>
+        <div class="d-flex justify-content-between mb-2">
+          <span class="text-muted">Date & Venue:</span>
+          <strong class="text-white">{{ participant.event.date|date:"M d, Y" }} · {{ participant.event.venue }}</strong>
+        </div>
+        <div class="d-flex justify-content-between">
+          <span class="text-muted">Verification Hash:</span>
+          <span class="text-slate-400 font-monospace text-truncate ms-2" style="max-width: 180px;">{{ participant.certificate_hash }}</span>
         </div>
       </div>
 
-      <div class="alert alert-info text-start">
-        <i class="bi bi-lightbulb me-2"></i>
-        <strong>What's next?</strong> Attend the event. Once attendance is marked and you submit feedback, your PDF certificate will be available for download.
-      </div>
-
-      <div class="d-flex gap-3 justify-content-center mt-3">
-        <a href="{% url 'register' %}" class="btn btn-primary-gold">
-          <i class="bi bi-person-plus me-1"></i>Register Another
+      <div class="d-flex flex-wrap gap-2 justify-content-center">
+        <a href="{% url 'verify_certificate' hash=participant.certificate_hash %}" class="btn btn-brand">
+          <i class="fa-solid fa-qrcode me-1"></i> Public Verification Page
         </a>
-        <a href="{% url 'index' %}" class="btn" style="border:1.5px solid var(--navy);color:var(--navy);padding:0.7rem 1.5rem;border-radius:8px;font-weight:600;">
-          <i class="bi bi-house me-1"></i>Home
+        <a href="{% url 'index' %}" class="btn btn-outline-light">
+          Back to Events Home
         </a>
       </div>
     </div>

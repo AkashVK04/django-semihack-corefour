@@ -1,0 +1,69 @@
+{% extends 'events/base.html' %}
+
+{% block title %}{{ action }} Event — EduEvent{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-4">
+  <div class="col-md-8 col-lg-7">
+    <div class="card-custom p-4 p-md-5">
+      <h3 class="font-display fw-bold text-white mb-3">{{ action }} Academic Event</h3>
+
+      <form method="POST">
+        {% csrf_token %}
+
+        <div class="mb-3">
+          <label class="form-label text-slate-300 small fw-semibold">Event Name *</label>
+          {{ form.name }}
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-slate-300 small fw-semibold">Description</label>
+          {{ form.description }}
+        </div>
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-4">
+            <label class="form-label text-slate-300 small fw-semibold">Event Date *</label>
+            {{ form.date }}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label text-slate-300 small fw-semibold">Start Time</label>
+            {{ form.start_time }}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label text-slate-300 small fw-semibold">End Time</label>
+            {{ form.end_time }}
+          </div>
+        </div>
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label class="form-label text-slate-300 small fw-semibold">Venue *</label>
+            {{ form.venue }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label text-slate-300 small fw-semibold">Capacity Limit *</label>
+            {{ form.capacity }}
+          </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+          <div class="col-md-6">
+            <label class="form-label text-slate-300 small fw-semibold">Event Status *</label>
+            {{ form.status }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label text-slate-300 small fw-semibold">Registration Deadline</label>
+            {{ form.registration_deadline }}
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2">
+          <a href="{% url 'organizer_dashboard' %}" class="btn btn-outline-secondary">Cancel</a>
+          <button type="submit" class="btn btn-emerald px-4">Save Event</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

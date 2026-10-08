@@ -1,0 +1,25 @@
+{% extends 'events/base.html' %}
+
+{% block title %}Reinstate Certificate — Admin Portal{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-4">
+  <div class="col-md-6 text-center">
+    <div class="card-custom p-4 border-success">
+      <i class="fa-solid fa-rotate-left text-success display-4 mb-3"></i>
+      <h4 class="font-display fw-bold text-white mb-2">Reinstate Certificate</h4>
+      <p class="text-slate-400 small mb-4">
+        Are you sure you want to reinstate certificate <strong class="text-white font-monospace">{{ certificate.certificate_id }}</strong> for <strong class="text-white">{{ participant.name }}</strong> as VALID?
+      </p>
+
+      <form method="POST">
+        {% csrf_token %}
+        <div class="d-flex justify-content-center gap-2">
+          <a href="{% url 'organizer_dashboard' %}" class="btn btn-outline-secondary btn-sm">Cancel</a>
+          <button type="submit" class="btn btn-success btn-sm px-4">Confirm Reinstatement</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

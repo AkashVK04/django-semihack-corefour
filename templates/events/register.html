@@ -1,150 +1,58 @@
 {% extends 'events/base.html' %}
-{% block title %}Register — EduEvent{% endblock %}
+
+{% block title %}Event Registration — EduEvent{% endblock %}
 
 {% block content %}
-<div class="page-header">
-  <div class="container">
-    <nav aria-label="breadcrumb">
-      <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
-        <li class="breadcrumb-item active">Register</li>
-      </ol>
-    </nav>
-    <h1><i class="bi bi-person-plus me-2" style="color:var(--gold);"></i>Event Registration</h1>
-    <p>Fill in your details to register for an academic event.</p>
-  </div>
-</div>
-
-<div class="container pb-5">
-  <div class="row justify-content-center">
-    <div class="col-lg-7 col-md-9">
-
-      <!-- INFO BANNER -->
-      <div class="alert alert-info d-flex align-items-start gap-3 mb-4">
-        <i class="bi bi-info-circle-fill flex-shrink-0 mt-1" style="font-size:1.1rem;color:#3b82f6;"></i>
-        <div>
-          <strong>Registration Notes:</strong><br>
-          Each Student ID can only be used once. After attending the event and submitting feedback,
-          you'll receive a downloadable PDF certificate.
-        </div>
+<div class="row justify-content-center py-4">
+  <div class="col-md-8 col-lg-6">
+    <div class="card-custom p-4 p-md-5">
+      <div class="text-center mb-4">
+        <span class="badge badge-open mb-2">Student Registration</span>
+        <h3 class="font-display fw-bold text-white mb-1">Academic Event Registration</h3>
+        <p class="text-slate-400 small">Enter your details to generate your official event QR code.</p>
       </div>
 
-      <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <span><i class="bi bi-clipboard-plus me-2"></i>Participant Details</span>
-          <span class="badge" style="background:rgba(201,168,76,0.2);color:var(--gold);font-size:0.75rem;">CO2 · CO3</span>
+      <form method="POST" action="{% url 'register' %}">
+        {% csrf_token %}
+
+        <div class="mb-3">
+          <label class="form-label text-slate-300 small fw-semibold">Select Event *</label>
+          {{ form.event }}
+          {% if form.event.errors %}
+            <div class="text-danger small mt-1">{{ form.event.errors.0 }}</div>
+          {% endif %}
         </div>
-        <div class="card-body p-4">
-          <form method="post" id="registrationForm" novalidate>
-            {% csrf_token %}
 
-            <div class="row g-3">
-              <div class="col-12">
-                <label for="id_student_id" class="form-label">
-                  <i class="bi bi-person-badge me-1"></i>Student ID *
-                </label>
-                {{ form.student_id }}
-                {% if form.student_id.errors %}
-                  <div class="mt-1" style="color:var(--danger);font-size:0.82rem;">
-                    {% for err in form.student_id.errors %}<i class="bi bi-exclamation-circle me-1"></i>{{ err }}{% endfor %}
-                  </div>
-                {% endif %}
-                <div style="color:var(--muted);font-size:0.78rem;margin-top:4px;">e.g. CS2024001 — must be unique</div>
-              </div>
-
-              <div class="col-12">
-                <label for="id_name" class="form-label">
-                  <i class="bi bi-person me-1"></i>Full Name *
-                </label>
-                {{ form.name }}
-                {% if form.name.errors %}
-                  <div class="mt-1" style="color:var(--danger);font-size:0.82rem;">
-                    {% for err in form.name.errors %}<i class="bi bi-exclamation-circle me-1"></i>{{ err }}{% endfor %}
-                  </div>
-                {% endif %}
-              </div>
-
-              <div class="col-12">
-                <label for="id_email" class="form-label">
-                  <i class="bi bi-envelope me-1"></i>Email Address *
-                </label>
-                {{ form.email }}
-                {% if form.email.errors %}
-                  <div class="mt-1" style="color:var(--danger);font-size:0.82rem;">
-                    {% for err in form.email.errors %}<i class="bi bi-exclamation-circle me-1"></i>{{ err }}{% endfor %}
-                  </div>
-                {% endif %}
-              </div>
-
-              <div class="col-12">
-                <label for="id_event" class="form-label">
-                  <i class="bi bi-calendar-event me-1"></i>Select Event *
-                </label>
-                {{ form.event }}
-                {% if form.event.errors %}
-                  <div class="mt-1" style="color:var(--danger);font-size:0.82rem;">
-                    {% for err in form.event.errors %}<i class="bi bi-exclamation-circle me-1"></i>{{ err }}{% endfor %}
-                  </div>
-                {% endif %}
-              </div>
-
-              <div class="col-12 pt-2">
-                <button type="submit" class="btn btn-primary-gold w-100" id="submitBtn">
-                  <i class="bi bi-check-circle me-2"></i>Complete Registration
-                </button>
-              </div>
-            </div>
-          </form>
+        <div class="mb-3">
+          <label class="form-label text-slate-300 small fw-semibold">Student ID / Roll No *</label>
+          {{ form.student_id }}
+          <small class="text-muted d-block mt-1">Unique institutional ID (e.g. CS2026001). Checked against duplicates.</small>
+          {% if form.student_id.errors %}
+            <div class="text-danger small mt-1">{{ form.student_id.errors.0 }}</div>
+          {% endif %}
         </div>
-      </div>
 
-      <!-- PROCESS STEPS -->
-      <div class="mt-4 p-4" style="background:white;border:1px solid #e5e0d6;border-radius:12px;">
-        <div style="font-size:0.78rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);font-weight:600;margin-bottom:1rem;">Certificate Process</div>
-        <div class="d-flex flex-column gap-2">
-          {% for step, label, done in steps %}{% endfor %}
-          <div class="d-flex align-items-center gap-3">
-            <div style="width:28px;height:28px;background:var(--navy);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-              <span style="color:var(--gold);font-size:0.75rem;font-weight:700;">1</span>
-            </div>
-            <span style="font-size:0.87rem;">Register for event</span>
-            <i class="bi bi-check-circle-fill ms-auto" style="color:var(--success);"></i>
-          </div>
-          <div style="width:1px;height:16px;background:#e5e0d6;margin-left:14px;"></div>
-          <div class="d-flex align-items-center gap-3">
-            <div style="width:28px;height:28px;background:#f3f4f6;border:2px solid #d1d5db;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-              <span style="color:#9ca3af;font-size:0.75rem;font-weight:700;">2</span>
-            </div>
-            <span style="font-size:0.87rem;color:var(--muted);">Attend the event (admin marks attendance)</span>
-          </div>
-          <div style="width:1px;height:16px;background:#e5e0d6;margin-left:14px;"></div>
-          <div class="d-flex align-items-center gap-3">
-            <div style="width:28px;height:28px;background:#f3f4f6;border:2px solid #d1d5db;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-              <span style="color:#9ca3af;font-size:0.75rem;font-weight:700;">3</span>
-            </div>
-            <span style="font-size:0.87rem;color:var(--muted);">Submit event feedback</span>
-          </div>
-          <div style="width:1px;height:16px;background:#e5e0d6;margin-left:14px;"></div>
-          <div class="d-flex align-items-center gap-3">
-            <div style="width:28px;height:28px;background:#f3f4f6;border:2px solid #d1d5db;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-              <i class="bi bi-file-earmark-pdf" style="color:#9ca3af;font-size:0.8rem;"></i>
-            </div>
-            <span style="font-size:0.87rem;color:var(--muted);">Download your PDF certificate</span>
-          </div>
+        <div class="mb-3">
+          <label class="form-label text-slate-300 small fw-semibold">Full Name *</label>
+          {{ form.name }}
+          {% if form.name.errors %}
+            <div class="text-danger small mt-1">{{ form.name.errors.0 }}</div>
+          {% endif %}
         </div>
-      </div>
 
+        <div class="mb-4">
+          <label class="form-label text-slate-300 small fw-semibold">Email Address *</label>
+          {{ form.email }}
+          {% if form.email.errors %}
+            <div class="text-danger small mt-1">{{ form.email.errors.0 }}</div>
+          {% endif %}
+        </div>
+
+        <button type="submit" class="btn btn-brand btn-lg w-100 py-2 font-display">
+          Complete Registration <i class="fa-solid fa-arrow-right ms-2"></i>
+        </button>
+      </form>
     </div>
   </div>
 </div>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-  document.getElementById('registrationForm').addEventListener('submit', function() {
-    const btn = document.getElementById('submitBtn');
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Registering...';
-    btn.disabled = true;
-  });
-</script>
 {% endblock %}

@@ -1,0 +1,50 @@
+{% extends 'events/base.html' %}
+
+{% block title %}Global Event Governance — Admin Portal — EduEvent V2{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+  <div>
+    <div class="d-flex align-items-center gap-2 mb-1">
+      <h2 class="font-display fw-bold text-white mb-0">Global Event Governance</h2>
+      <span class="badge badge-glass badge-open">System Events</span>
+    </div>
+    <p class="text-slate-400 small mb-0">System-wide directory of all academic seminars, workshops, and hackathons.</p>
+  </div>
+  <a href="{% url 'system_admin_dashboard' %}" class="btn btn-glass-outline btn-sm">
+    <i class="fa-solid fa-arrow-left me-1"></i> Admin Dashboard
+  </a>
+</div>
+
+<div class="glass-card p-4">
+  <div class="table-responsive">
+    <table class="table table-dark table-hover align-middle mb-0 bg-transparent">
+      <thead>
+        <tr class="text-slate-400 small font-display border-bottom border-secondary border-opacity-25">
+          <th>Event Name</th>
+          <th>Organizer</th>
+          <th>Date & Venue</th>
+          <th>Status</th>
+          <th class="text-end">Registrations</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ev in events %}
+          <tr class="border-bottom border-secondary border-opacity-10">
+            <td><strong class="text-white font-display fs-6">{{ ev.name }}</strong></td>
+            <td class="small text-info"><i class="fa-solid fa-user-gear me-1"></i> {{ ev.organizer.username|default:"System Admin" }}</td>
+            <td class="small text-slate-300">
+              <div><i class="fa-regular fa-calendar me-1 text-info"></i> {{ ev.date|date:"M d, Y" }}</div>
+              <div class="text-muted"><i class="fa-solid fa-location-dot me-1 text-danger"></i> {{ ev.venue }}</div>
+            </td>
+            <td><span class="badge badge-glass {% if ev.is_registration_open %}badge-open{% else %}badge-closed{% endif %}">{{ ev.get_status_display }}</span></td>
+            <td class="text-end"><strong class="text-white font-display fs-6">{{ ev.p_count }}</strong> / {{ ev.capacity }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5" class="text-center py-5 text-muted">No events registered in system.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

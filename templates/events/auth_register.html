@@ -1,0 +1,75 @@
+{% extends 'events/base.html' %}
+
+{% block title %}Sign Up — EduEvent Platform{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center align-items-center py-5" style="min-height: 80vh;">
+  <div class="col-md-7 col-lg-5">
+    <div class="glass-card p-4 p-md-5">
+      
+      <div class="text-center mb-4">
+        <div class="brand-icon-box mx-auto mb-3" style="width:54px; height:54px; font-size:24px; background: linear-gradient(135deg, #10B981 0%, #00F2FE 100%);">
+          <i class="fa-solid fa-user-plus"></i>
+        </div>
+        <h3 class="font-display fw-extrabold text-white mb-1">JOIN EDUEVENT</h3>
+        <p class="text-slate-300 small font-display">
+          Your campus is <span id="rotating-text" class="text-info fw-bold" style="transition: opacity 0.4s ease;">DISCOVERING</span>
+        </p>
+      </div>
+
+      <form method="POST" action="{% url 'signup' %}">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label class="form-label text-slate-300 small font-display fw-semibold">Username *</label>
+          {{ form.username }}
+        </div>
+        <div class="mb-3">
+          <label class="form-label text-slate-300 small font-display fw-semibold">Email Address *</label>
+          {{ form.email }}
+        </div>
+        <div class="mb-3">
+          <label class="form-label text-slate-300 small font-display fw-semibold">Select Role *</label>
+          {{ form.role }}
+        </div>
+        <div class="mb-3">
+          <label class="form-label text-slate-300 small font-display fw-semibold">Password *</label>
+          {{ form.password }}
+        </div>
+        <div class="mb-4">
+          <label class="form-label text-slate-300 small font-display fw-semibold">Confirm Password *</label>
+          {{ form.confirm_password }}
+        </div>
+
+        <button type="submit" class="btn btn-glass-emerald w-100 py-2 font-display mb-3 fs-6">
+          CREATE ACCOUNT →
+        </button>
+      </form>
+
+      <div class="text-center small text-slate-400 pt-2 border-top border-secondary border-opacity-25">
+        Already registered? <a href="{% url 'login' %}" class="text-info font-display fw-semibold">Log In</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const rotater = document.getElementById('rotating-text');
+    if (!rotater) return;
+
+    const phrases = ['DISCOVERING', 'CONNECTING', 'CREATING', 'PARTICIPATING'];
+    let idx = 0;
+
+    setInterval(function() {
+      rotater.style.opacity = '0';
+      setTimeout(function() {
+        idx = (idx + 1) % phrases.length;
+        rotater.textContent = phrases[idx];
+        rotater.style.opacity = '1';
+      }, 400);
+    }, 2400);
+  });
+</script>
+{% endblock %}

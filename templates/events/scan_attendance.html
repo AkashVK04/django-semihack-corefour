@@ -1,0 +1,116 @@
+{% extends 'events/base.html' %}
+
+{% block title %}QR Attendance Scanner — EduEvent{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-4">
+  <div class="col-lg-8">
+    <div class="card-custom p-4 p-md-5">
+      <div class="text-center mb-4">
+        <span class="badge badge-open mb-2">Attendance Staff Portal</span>
+        <h3 class="font-display fw-bold text-white mb-1">Live Camera QR Attendance Scanner</h3>
+        <p class="text-slate-400 small">Scan participant QR codes at event entry gates for real-time check-in.</p>
+      </div>
+
+      <div class="row g-4 align-items-center">
+        <div class="col-md-7">
+          <div id="qr-reader" class="rounded-3 border border-secondary overflow-hidden bg-black" style="width: 100%; min-height: 280px;"></div>
+        </div>
+        <div class="col-md-5">
+          <div class="card-custom bg-dark p-3 mb-3">
+            <h6 class="text-white font-display mb-2">Manual Entry Fallback</h6>
+            <div class="input-group">
+              <input type="text" id="manual-student-id" class="form-control" placeholder="Student ID or Hash">
+              <button class="btn btn-brand" onclick="submitManualCode()">Mark</button>
+            </div>
+          </div>
+
+          <div id="scan-result" class="card-custom p-3 text-center d-none">
+            <div id="scan-icon" class="display-5 mb-2"></div>
+            <h6 id="scan-title" class="text-white font-display mb-1"></h6>
+            <p id="scan-message" class="small text-slate-300 mb-0"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- html5-qrcode CDN -->
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+<script>
+  let html5QrcodeScanner;
+
+  function onScanSuccess(decodedText, decodedResult) {
+    console.log(`Scan result: ${decodedText}`);
+    processAttendanceCode(decodedText);
+  }
+
+  async function processAttendanceCode(code) {
+    const csrfToken = document.cookie
+      .split('; ')
+      .find(row => row.startsWith('csrftoken='))
+      ?.split('=')[1];
+
+    const resultBox = document.getElementById('scan-result');
+    const iconEl = document.getElementById('scan-icon');
+    const titleEl = document.getElementById('scan-title');
+    const msgEl = document.getElementById('scan-message');
+
+    resultBox.classList.remove('d-none', 'border-success', 'border-warning', 'border-danger');
+
+    try {
+      const response = await fetch('/mark-qr/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify({ qr_data: code })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.status === 'success') {
+        resultBox.classList.add('border-success');
+        iconEl.innerHTML = '<i class="fa-solid fa-circle-check text-success"></i>';
+        titleEl.textContent = "Attendance Recorded!";
+        msgEl.textContent = `${data.participant.name} (${data.participant.student_id}) at ${data.participant.timestamp}`;
+      } else if (data.status === 'already_marked') {
+        resultBox.classList.add('border-warning');
+        iconEl.innerHTML = '<i class="fa-solid fa-circle-info text-warning"></i>';
+        titleEl.textContent = "Already Checked In";
+        msgEl.textContent = `${data.participant.name} was marked present at ${data.participant.timestamp}`;
+      } else {
+        resultBox.classList.add('border-danger');
+        iconEl.innerHTML = '<i class="fa-solid fa-circle-xmark text-danger"></i>';
+        titleEl.textContent = "Check-In Error";
+        msgEl.textContent = data.message || "Invalid or unknown QR code.";
+      }
+    } catch (err) {
+      resultBox.classList.add('border-danger');
+      iconEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-danger"></i>';
+      titleEl.textContent = "Network Error";
+      msgEl.textContent = "Unable to connect to attendance server.";
+    }
+  }
+
+  function submitManualCode() {
+    const val = document.getElementById('manual-student-id').value.trim();
+    if (val) {
+      processAttendanceCode(val);
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    html5QrcodeScanner = new Html5QrcodeScanner(
+      "qr-reader",
+      { fps: 10, qrbox: { width: 220, height: 220 } },
+      /* verbose= */ false
+    );
+    html5QrcodeScanner.render(onScanSuccess);
+  });
+</script>
+{% endblock %}

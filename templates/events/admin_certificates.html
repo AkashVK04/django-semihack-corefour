@@ -1,0 +1,73 @@
+{% extends 'events/base.html' %}
+
+{% block title %}Global Certificate Governance — Admin Portal — EduEvent V2{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+  <div>
+    <div class="d-flex align-items-center gap-2 mb-1">
+      <h2 class="font-display fw-bold text-white mb-0">Global Certificate Governance</h2>
+      <span class="badge badge-glass badge-valid">Security & Compliance</span>
+    </div>
+    <p class="text-slate-400 small mb-0">System-wide inspection, validation, and administrative revocation/restoration of digital certificates.</p>
+  </div>
+  <a href="{% url 'system_admin_dashboard' %}" class="btn btn-glass-outline btn-sm">
+    <i class="fa-solid fa-arrow-left me-1"></i> Admin Dashboard
+  </a>
+</div>
+
+<div class="glass-card p-4">
+  <div class="table-responsive">
+    <table class="table table-dark table-hover align-middle mb-0 bg-transparent">
+      <thead>
+        <tr class="text-slate-400 small font-display border-bottom border-secondary border-opacity-25">
+          <th>Certificate ID</th>
+          <th>Student Name & ID</th>
+          <th>Event Title</th>
+          <th>Status</th>
+          <th>Issued Date</th>
+          <th class="text-end">Admin Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for cert in certificates %}
+          <tr class="border-bottom border-secondary border-opacity-10">
+            <td><code class="text-info font-monospace fs-6 px-2 py-1 rounded bg-dark border border-secondary border-opacity-25">{{ cert.certificate_id }}</code></td>
+            <td>
+              <strong class="text-white font-display d-block fs-6">{{ cert.participant.name }}</strong>
+              <small class="text-muted font-monospace">{{ cert.participant.student_id }}</small>
+            </td>
+            <td class="small text-slate-300">{{ cert.event.name }}</td>
+            <td>
+              {% if cert.status == 'REVOKED' %}
+                <span class="badge badge-glass badge-revoked"><i class="fa-solid fa-ban me-1"></i> REVOKED</span>
+              {% else %}
+                <span class="badge badge-glass badge-valid"><i class="fa-solid fa-check me-1"></i> VALID</span>
+              {% endif %}
+            </td>
+            <td class="small text-muted font-display">{{ cert.issued_at|date:"M d, Y" }}</td>
+            <td class="text-end">
+              <div class="d-flex align-items-center justify-content-end gap-1">
+                <a href="{% url 'verify_certificate' hash=cert.certificate_hash %}" class="btn btn-glass-outline btn-sm py-1 px-2" title="Public Verify Page">
+                  <i class="fa-solid fa-eye me-1 text-info"></i> Verify
+                </a>
+                {% if cert.status == 'REVOKED' %}
+                  <a href="{% url 'admin_restore_certificate' pk=cert.pk %}" class="btn btn-glass-emerald btn-sm py-1 px-2" title="Reinstate Certificate">
+                    <i class="fa-solid fa-rotate-left me-1"></i> Restore
+                  </a>
+                {% else %}
+                  <a href="{% url 'admin_revoke_certificate' pk=cert.pk %}" class="btn btn-glass-outline btn-sm py-1 px-2 text-danger border-danger border-opacity-50" title="Revoke Certificate">
+                    <i class="fa-solid fa-ban me-1"></i> Revoke
+                  </a>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6" class="text-center py-5 text-muted">No certificate records found in system.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

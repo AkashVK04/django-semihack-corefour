@@ -1,0 +1,65 @@
+{% extends 'events/base.html' %}
+
+{% block title %}User Role Governance — Admin Portal — EduEvent V2{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+  <div>
+    <div class="d-flex align-items-center gap-2 mb-1">
+      <h2 class="font-display fw-bold text-white mb-0">User Role Governance</h2>
+      <span class="badge badge-glass badge-open">System Security</span>
+    </div>
+    <p class="text-slate-400 small mb-0">Assign primary system roles: STUDENT, EVENT_ORGANIZER, ATTENDANCE_STAFF, ADMIN.</p>
+  </div>
+  <a href="{% url 'system_admin_dashboard' %}" class="btn btn-glass-outline btn-sm">
+    <i class="fa-solid fa-arrow-left me-1"></i> Admin Dashboard
+  </a>
+</div>
+
+<div class="glass-card p-4">
+  <div class="table-responsive">
+    <table class="table table-dark table-hover align-middle mb-0 bg-transparent">
+      <thead>
+        <tr class="text-slate-400 small font-display border-bottom border-secondary border-opacity-25">
+          <th>Username</th>
+          <th>Email Address</th>
+          <th>Current Role</th>
+          <th>Assign System Role</th>
+          <th class="text-end">Joined Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in users %}
+          <tr class="border-bottom border-secondary border-opacity-10">
+            <td>
+              <strong class="text-white font-display fs-6 me-2">{{ u.username }}</strong>
+              {% if u.is_superuser %}<span class="badge badge-glass badge-revoked">Root Admin</span>{% endif %}
+            </td>
+            <td class="small text-slate-300">{{ u.email|default:"N/A" }}</td>
+            <td>
+              <span class="badge badge-glass badge-valid">
+                {% if u.profile %}{{ u.profile.get_role_display }}{% else %}Student{% endif %}
+              </span>
+            </td>
+            <td>
+              <form method="POST" action="{% url 'admin_user_management' %}" class="d-flex gap-2">
+                {% csrf_token %}
+                <input type="hidden" name="user_id" value="{{ u.id }}">
+                <select name="role" class="form-select form-control-glass py-1 px-2 text-sm" style="max-width: 220px;">
+                  {% for r_code, r_name in roles %}
+                    <option value="{{ r_code }}" {% if u.profile and u.profile.role == r_code %}selected{% endif %}>{{ r_name }}</option>
+                  {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-glass-primary btn-sm py-1 px-3">Update Role</button>
+              </form>
+            </td>
+            <td class="text-end">
+              <span class="small text-muted font-display">{{ u.date_joined|date:"M d, Y" }}</span>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

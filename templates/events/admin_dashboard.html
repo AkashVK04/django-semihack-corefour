@@ -1,231 +1,128 @@
 {% extends 'events/base.html' %}
-{% block title %}Admin Dashboard — EduEvent{% endblock %}
+
+{% block title %}System Administrator Control Panel — EduEvent V2{% endblock %}
 
 {% block content %}
-<div class="page-header">
-  <div class="container">
-    <nav aria-label="breadcrumb">
-      <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
-        <li class="breadcrumb-item active">Dashboard</li>
-      </ol>
-    </nav>
-    <div class="d-flex flex-wrap justify-content-between align-items-end gap-3">
-      <div>
-        <h1><i class="bi bi-speedometer2 me-2" style="color:var(--gold);"></i>Admin Dashboard</h1>
-        <p>Manage attendance, monitor feedback, and issue certificates.</p>
-      </div>
-      <div class="d-flex gap-2">
-        <a href="{% url 'export_csv' %}" class="btn btn-sm" style="background:rgba(201,168,76,0.15);color:var(--gold);border:1px solid rgba(201,168,76,0.4);border-radius:7px;font-size:0.82rem;font-weight:600;">
-          <i class="bi bi-download me-1"></i>Export CSV
-        </a>
-      </div>
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+  <div>
+    <div class="d-flex align-items-center gap-2 mb-1">
+      <h2 class="font-display fw-bold text-white mb-0">System Administrator Panel</h2>
+      <span class="badge badge-glass badge-valid"><i class="fa-solid fa-shield-halved me-1"></i> Root Governance</span>
+    </div>
+    <p class="text-slate-400 small mb-0">Global platform oversight, user role administration, global events control, and certificate revocation governance.</p>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{% url 'admin_user_management' %}" class="btn btn-glass-primary">
+      <i class="fa-solid fa-users-gear me-1"></i> User Roles
+    </a>
+    <a href="{% url 'admin_certificate_management' %}" class="btn btn-glass-outline">
+      <i class="fa-solid fa-certificate me-1 text-warning"></i> Certificate Control
+    </a>
+  </div>
+</div>
+
+<!-- Admin Global Metrics Grid -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-4 col-lg-2">
+    <div class="glass-card p-3 text-center">
+      <span class="text-slate-400 small font-display d-block mb-1">Total Users</span>
+      <h3 class="font-display fw-bold text-white mb-0">{{ stats.total_users }}</h3>
+    </div>
+  </div>
+  <div class="col-6 col-md-4 col-lg-2">
+    <div class="glass-card p-3 text-center">
+      <span class="text-slate-400 small font-display d-block mb-1">Total Events</span>
+      <h3 class="font-display fw-bold text-info mb-0">{{ stats.total_events }}</h3>
+    </div>
+  </div>
+  <div class="col-6 col-md-4 col-lg-2">
+    <div class="glass-card p-3 text-center">
+      <span class="text-slate-400 small font-display d-block mb-1">Registrations</span>
+      <h3 class="font-display fw-bold text-white mb-0">{{ stats.total_participants }}</h3>
+    </div>
+  </div>
+  <div class="col-6 col-md-4 col-lg-2">
+    <div class="glass-card p-3 text-center">
+      <span class="text-slate-400 small font-display d-block mb-1">Valid Certs</span>
+      <h3 class="font-display fw-bold text-success mb-0">{{ stats.valid_certs }}</h3>
+    </div>
+  </div>
+  <div class="col-6 col-md-4 col-lg-2">
+    <div class="glass-card p-3 text-center">
+      <span class="text-slate-400 small font-display d-block mb-1">Revoked Certs</span>
+      <h3 class="font-display fw-bold text-danger mb-0">{{ stats.revoked_certs }}</h3>
+    </div>
+  </div>
+  <div class="col-6 col-md-4 col-lg-2">
+    <div class="glass-card p-3 text-center">
+      <span class="text-slate-400 small font-display d-block mb-1">Attendance</span>
+      <h3 class="font-display fw-bold text-warning mb-0">{{ stats.attendance_rate }}%</h3>
     </div>
   </div>
 </div>
 
-<div class="container pb-5">
-  <!-- STATS -->
-  <div class="row g-3 mb-4">
-    <div class="col-6 col-md-3">
-      <div class="stat-card navy">
-        <div class="stat-number">{{ stats.total }}</div>
-        <div class="stat-label">Total Registered</div>
+<div class="row g-4 mb-5">
+  <!-- System Users Card -->
+  <div class="col-lg-7">
+    <div class="glass-card p-4 h-100">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="font-display fw-bold text-white mb-0">
+          <i class="fa-solid fa-users-gear text-info me-2"></i>System Users & Role Matrix
+        </h4>
+        <a href="{% url 'admin_user_management' %}" class="btn btn-glass-outline btn-sm">Manage Roles</a>
       </div>
-    </div>
-    <div class="col-6 col-md-3">
-      <div class="stat-card success">
-        <div class="stat-number" style="color:#065f46;">{{ stats.present }}</div>
-        <div class="stat-label">Attended</div>
-      </div>
-    </div>
-    <div class="col-6 col-md-3">
-      <div class="stat-card" style="border-top:4px solid #2563eb;">
-        <div class="stat-number" style="color:#1e3a5f;">{{ stats.feedback }}</div>
-        <div class="stat-label">Feedback Submitted</div>
-      </div>
-    </div>
-    <div class="col-6 col-md-3">
-      <div class="stat-card purple">
-        <div class="stat-number" style="color:#6d28d9;">{{ stats.eligible }}</div>
-        <div class="stat-label">Certificate Eligible</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- FILTER BAR -->
-  <div class="card mb-4">
-    <div class="card-body p-3">
-      <form method="get" class="row g-2 align-items-end">
-        <div class="col-md-4">
-          <label class="form-label mb-1" style="font-size:0.78rem;">Search</label>
-          <input type="text" name="search" value="{{ search }}" class="form-control form-control-sm" placeholder="Name or Student ID...">
-        </div>
-        <div class="col-md-3">
-          <label class="form-label mb-1" style="font-size:0.78rem;">Filter by Event</label>
-          <select name="event" class="form-select form-select-sm">
-            <option value="">All Events</option>
-            {% for event in events %}
-              <option value="{{ event.pk }}" {% if selected_event == event.pk|stringformat:'s' %}selected{% endif %}>{{ event.name }}</option>
-            {% endfor %}
-          </select>
-        </div>
-        <div class="col-md-3">
-          <label class="form-label mb-1" style="font-size:0.78rem;">Attendance</label>
-          <select name="attendance" class="form-select form-select-sm">
-            <option value="">All</option>
-            <option value="1">Present</option>
-            <option value="0">Absent</option>
-          </select>
-        </div>
-        <div class="col-md-2">
-          <button type="submit" class="btn btn-sm w-100" style="background:var(--navy);color:var(--gold);border:none;border-radius:7px;font-weight:600;">
-            <i class="bi bi-search me-1"></i>Filter
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- TABLE -->
-  <div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center">
-      <span><i class="bi bi-table me-2"></i>Participants ({{ participants|length }})</span>
-      <span class="badge" style="background:rgba(201,168,76,0.2);color:var(--gold);font-size:0.72rem;">CO5 · AJAX Toggle</span>
-    </div>
-    <div class="card-body p-0">
-      {% if participants %}
       <div class="table-responsive">
-        <table class="table table-main mb-0">
+        <table class="table table-dark table-hover align-middle mb-0 bg-transparent">
           <thead>
-            <tr>
-              <th>Student ID</th>
-              <th>Name</th>
-              <th>Event</th>
-              <th class="text-center">Attendance</th>
-              <th class="text-center">Feedback</th>
-              <th class="text-center">Certificate</th>
-              <th class="text-center">Actions</th>
+            <tr class="text-slate-400 small font-display border-bottom border-secondary border-opacity-25">
+              <th>Username</th>
+              <th>Email</th>
+              <th>Assigned Role</th>
+              <th>Joined Date</th>
             </tr>
           </thead>
           <tbody>
-            {% for p in participants %}
-            <tr id="row-{{ p.pk }}">
-              <td><span class="mono">{{ p.student_id }}</span></td>
-              <td>
-                <div style="font-weight:600;">{{ p.name }}</div>
-                <div style="font-size:0.75rem;color:var(--muted);">{{ p.email }}</div>
-              </td>
-              <td style="font-size:0.85rem;">{{ p.event.name }}</td>
-              <td class="text-center">
-                <button class="toggle-btn" 
-                        data-pk="{{ p.pk }}" 
-                        title="Toggle attendance"
-                        onclick="toggleAttendance({{ p.pk }}, this)">
-                  <span class="attendance-icon">
-                    {% if p.attendance %}✅{% else %}⬜{% endif %}
+            {% for u in recent_users %}
+              <tr class="border-bottom border-secondary border-opacity-10">
+                <td><strong class="text-white font-display">{{ u.username }}</strong></td>
+                <td class="small text-slate-300">{{ u.email|default:"N/A" }}</td>
+                <td>
+                  <span class="badge badge-glass badge-open">
+                    {% if u.profile %}{{ u.profile.get_role_display }}{% elif u.is_superuser %}Administrator{% else %}Student{% endif %}
                   </span>
-                </button>
-              </td>
-              <td class="text-center">
-                {% if p.feedback_submitted %}
-                  <span class="badge badge-done"><i class="bi bi-check me-1"></i>Done</span>
-                {% else %}
-                  <span class="badge badge-pending">Pending</span>
-                {% endif %}
-              </td>
-              <td class="text-center">
-                {% if p.eligible_for_certificate %}
-                  <span class="badge" id="cert-badge-{{ p.pk }}" style="background:#f3e8ff;color:#6d28d9;border:1px solid #d8b4fe;">
-                    <i class="bi bi-file-earmark-check me-1"></i>Ready
-                  </span>
-                {% else %}
-                  <span class="badge badge-pending" id="cert-badge-{{ p.pk }}">Locked</span>
-                {% endif %}
-              </td>
-              <td class="text-center">
-                <div class="d-flex gap-1 justify-content-center">
-                  {% if p.attendance and not p.feedback_submitted %}
-                  <a href="{% url 'feedback' p.pk %}" class="btn btn-sm btn-sm-action" style="background:#fff7ed;color:#c2410c;border:1px solid #fed7aa;" title="Collect feedback">
-                    <i class="bi bi-star"></i>
-                  </a>
-                  {% endif %}
-                  {% if p.eligible_for_certificate %}
-                  <a href="{% url 'certificate' p.certificate_hash %}" class="btn btn-sm btn-sm-action" style="background:#f3e8ff;color:#7c3aed;border:1px solid #ddd6fe;" title="Download certificate">
-                    <i class="bi bi-download"></i>
-                  </a>
-                  {% endif %}
-                </div>
-              </td>
-            </tr>
+                </td>
+                <td class="small text-muted">{{ u.date_joined|date:"M d, Y" }}</td>
+              </tr>
             {% endfor %}
           </tbody>
         </table>
       </div>
-      {% else %}
-        <div class="text-center py-5">
-          <i class="bi bi-inbox" style="font-size:2.5rem;color:#d1d5db;"></i>
-          <p style="color:var(--muted);margin-top:1rem;">No participants found. <a href="{% url 'register' %}">Register someone</a>.</p>
-        </div>
-      {% endif %}
     </div>
   </div>
 
+  <!-- Global Events Summary -->
+  <div class="col-lg-5">
+    <div class="glass-card p-4 h-100">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="font-display fw-bold text-white mb-0">
+          <i class="fa-solid fa-calendar-check text-success me-2"></i>Global System Events
+        </h4>
+        <a href="{% url 'admin_event_management' %}" class="btn btn-glass-outline btn-sm">View All</a>
+      </div>
+      <div class="d-flex flex-column gap-3">
+        {% for ev in recent_events %}
+          <div class="p-3 rounded-3 bg-dark bg-opacity-50 border border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
+            <div>
+              <strong class="d-block text-white font-display fs-6">{{ ev.name }}</strong>
+              <small class="text-slate-400"><i class="fa-regular fa-calendar me-1 text-info"></i> {{ ev.date|date:"M d, Y" }} · {{ ev.venue }}</small>
+            </div>
+            <span class="badge badge-glass badge-open">{{ ev.p_count }} Registered</span>
+          </div>
+        {% empty %}
+          <div class="text-muted small text-center py-4">No events registered in system.</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
 </div>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-const CSRF_TOKEN = '{{ csrf_token }}';
-
-// Live attendance counter display
-let presentCount = {{ stats.present }};
-let eligibleCount = {{ stats.eligible }};
-
-async function toggleAttendance(pk, btn) {
-  btn.classList.add('loading');
-  try {
-    const res = await fetch(`/dashboard/toggle/${pk}/`, {
-      method: 'POST',
-      headers: {
-        'X-CSRFToken': CSRF_TOKEN,
-        'Content-Type': 'application/json',
-      },
-    });
-    const data = await res.json();
-    if (data.status === 'ok') {
-      // Update icon without page refresh (CO5 AJAX requirement)
-      btn.querySelector('.attendance-icon').textContent = data.attendance ? '✅' : '⬜';
-
-      // Update cert badge
-      const certBadge = document.getElementById(`cert-badge-${pk}`);
-      if (data.eligible) {
-        certBadge.style.cssText = 'background:#f3e8ff;color:#6d28d9;border:1px solid #d8b4fe;';
-        certBadge.innerHTML = '<i class="bi bi-file-earmark-check me-1"></i>Ready';
-      } else {
-        certBadge.style.cssText = '';
-        certBadge.className = 'badge badge-pending';
-        certBadge.textContent = 'Locked';
-      }
-
-      // Flash row
-      const row = document.getElementById(`row-${pk}`);
-      row.style.transition = 'background 0.3s';
-      row.style.background = data.attendance ? '#f0fdf4' : '#fff7ed';
-      setTimeout(() => { row.style.background = ''; }, 1000);
-    }
-  } catch (err) {
-    alert('Network error. Please try again.');
-  }
-  btn.classList.remove('loading');
-}
-
-// Real-time counter polling (every 15s)
-setInterval(async () => {
-  try {
-    const res = await fetch(window.location.href);
-    // silent refresh of stats — just update counter display on page
-  } catch {}
-}, 15000);
-</script>
 {% endblock %}

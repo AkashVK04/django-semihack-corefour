@@ -1,0 +1,150 @@
+{% extends 'events/base.html' %}
+
+{% block title %}Certificate Verification — EduEvent V2{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-4">
+  <div class="col-md-9 col-lg-8">
+
+    {% if status == 'NOT_FOUND' %}
+      <div class="glass-card p-5 text-center">
+        <i class="fa-solid fa-triangle-exclamation text-warning display-3 mb-3"></i>
+        <h3 class="font-display fw-bold text-white mb-2">Certificate Record Not Found</h3>
+        <p class="text-slate-400 small mb-4">
+          The requested hash <code class="text-warning font-monospace">{{ hash }}</code> does not match any registered certificate record in the EduEvent platform.
+        </p>
+        <a href="{% url 'index' %}" class="btn btn-glass-outline">Return to Home</a>
+      </div>
+
+    {% elif status == 'REVOKED' %}
+      <div class="glass-card p-4 p-md-5 text-center border-danger border-opacity-50">
+        <div class="mb-3">
+          <span class="badge badge-glass badge-revoked fs-6 px-4 py-2">
+            <i class="fa-solid fa-ban me-2"></i> CERTIFICATE REVOKED
+          </span>
+        </div>
+        <h2 class="font-display fw-bold text-white mb-2">Notice of Revocation</h2>
+        <p class="text-slate-400 small mb-4">
+          This academic certificate has been officially revoked by institution administrators.
+        </p>
+
+        <div class="glass-card p-4 text-start mb-4 bg-dark bg-opacity-75">
+          <div class="row g-3">
+            <div class="col-6">
+              <span class="text-muted small d-block font-display">Certificate ID</span>
+              <code class="text-danger font-monospace fs-6">{{ certificate.certificate_id }}</code>
+            </div>
+            <div class="col-6">
+              <span class="text-muted small d-block font-display">Student Name</span>
+              <strong class="text-white font-display fs-6">{{ participant.name }}</strong>
+            </div>
+            <div class="col-6">
+              <span class="text-muted small d-block font-display">Student ID</span>
+              <code class="text-slate-300 font-monospace">{{ participant.student_id }}</code>
+            </div>
+            <div class="col-6">
+              <span class="text-muted small d-block font-display">Event</span>
+              <strong class="text-white font-display">{{ event.name }}</strong>
+            </div>
+            <div class="col-12 border-top border-secondary border-opacity-25 pt-3">
+              <span class="text-danger small d-block fw-semibold mb-1"><i class="fa-solid fa-circle-exclamation me-1"></i> Revocation Reason:</span>
+              <p class="text-slate-300 small mb-0">{{ certificate.revocation_reason|default:"Revoked due to administrative policy update or record mismatch." }}</p>
+            </div>
+            <div class="col-12">
+              <span class="text-muted small d-block font-display">Revocation Date</span>
+              <span class="text-slate-400 small">{{ certificate.revoked_at|date:"F d, Y · H:i T" }}</span>
+            </div>
+          </div>
+        </div>
+
+        <p class="small text-muted mb-0">
+          <i class="fa-solid fa-shield-halved me-1 text-danger"></i> Server Verification Timestamp: {% now "Y-m-d H:i:s e" %}
+        </p>
+      </div>
+
+    {% elif status == 'VALID' %}
+      <div class="glass-card p-4 p-md-5 text-center">
+        <div class="mb-3">
+          <span class="badge badge-glass badge-valid fs-6 px-4 py-2">
+            <i class="fa-solid fa-shield-check me-2 text-success"></i> VERIFIED OFFICIAL CERTIFICATE
+          </span>
+        </div>
+
+        <h2 class="font-display fw-bold text-white mb-1">EduEvent Digital Certificate</h2>
+        <p class="text-slate-400 small mb-4">Department of Computer Science & Engineering · SJBIT</p>
+
+        <div class="glass-card p-4 text-start mb-4 bg-dark bg-opacity-75">
+          <div class="row g-3">
+            <div class="col-sm-6">
+              <span class="text-muted small d-block font-display">Certificate Serial ID</span>
+              <code class="text-info font-monospace fs-5 fw-bold">{{ certificate.certificate_id }}</code>
+            </div>
+            <div class="col-sm-6">
+              <span class="text-muted small d-block font-display">Status</span>
+              <span class="badge badge-glass badge-valid mt-1">VALID & ACTIVE</span>
+            </div>
+            <div class="col-sm-6">
+              <span class="text-muted small d-block font-display">Recipient Name</span>
+              <strong class="text-white fs-5 font-display">{{ participant.name }}</strong>
+            </div>
+            <div class="col-sm-6">
+              <span class="text-muted small d-block font-display">Student Roll No</span>
+              <code class="text-slate-200 font-monospace fs-6">{{ participant.student_id }}</code>
+            </div>
+            <div class="col-sm-6">
+              <span class="text-muted small d-block font-display">Academic Event</span>
+              <strong class="text-white font-display fs-6">{{ event.name }}</strong>
+            </div>
+            <div class="col-sm-6">
+              <span class="text-muted small d-block font-display">Event Date & Venue</span>
+              <strong class="text-slate-300 font-display">{{ event.date|date:"F d, Y" }} · {{ event.venue }}</strong>
+            </div>
+            <div class="col-12 border-top border-secondary border-opacity-25 pt-3">
+              <span class="text-muted small d-block font-display mb-1">Cryptographic SHA-256 Signature Hash</span>
+              <code class="text-info small font-monospace text-break px-2 py-1 rounded bg-black d-block border border-secondary border-opacity-25">{{ participant.certificate_hash }}</code>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2 justify-content-center">
+          <a href="{% url 'certificate' hash=participant.certificate_hash %}" class="btn btn-glass-emerald btn-lg px-4">
+            <i class="fa-solid fa-file-arrow-down me-2"></i> Download Verified PDF Certificate
+          </a>
+        </div>
+
+        {% if user.is_superuser or user.profile.is_organizer %}
+          <div class="mt-4 border-top border-secondary border-opacity-25 pt-3">
+            <a href="{% url 'revoke_certificate' pk=participant.pk %}" class="btn btn-glass-outline text-danger border-danger border-opacity-50 btn-sm">
+              <i class="fa-solid fa-ban me-1"></i> Admin Revoke Certificate
+            </a>
+          </div>
+        {% endif %}
+      </div>
+
+    {% else %}
+      <!-- PENDING ELIGIBILITY -->
+      <div class="glass-card p-5 text-center">
+        <i class="fa-solid fa-clock text-warning display-4 mb-3"></i>
+        <h3 class="font-display fw-bold text-white mb-2">Certificate Pending Eligibility</h3>
+        <p class="text-slate-400 small mb-4">
+          Registration recorded for <strong class="text-white font-display">{{ participant.name }}</strong>. Certificate issuance requires verified event attendance and completed event feedback.
+        </p>
+        <div class="d-flex justify-content-center gap-4 text-start mb-4">
+          <div>
+            <i class="fa-solid {% if participant.attendance %}fa-circle-check text-success{% else %}fa-circle-xmark text-muted{% endif %} me-2"></i>
+            <span>Attendance Marked</span>
+          </div>
+          <div>
+            <i class="fa-solid {% if participant.feedback_submitted %}fa-circle-check text-success{% else %}fa-circle-xmark text-muted{% endif %} me-2"></i>
+            <span>Feedback Submitted</span>
+          </div>
+        </div>
+        {% if participant.attendance and not participant.feedback_submitted %}
+          <a href="{% url 'feedback' pk=participant.pk %}" class="btn btn-glass-primary">Submit Event Feedback</a>
+        {% endif %}
+      </div>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}
